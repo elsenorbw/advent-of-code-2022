@@ -43,6 +43,17 @@
 
 # Find the Elf carrying the most Calories. How many total Calories is that Elf carrying?
 
+# --- Part Two ---
+# By the time you calculate the answer to the Elves' question, they've already realized that the Elf carrying the most Calories of food might eventually run out of snacks.
+
+# To avoid this unacceptable situation, the Elves would instead like to know the total Calories carried by the top three Elves carrying the most Calories.
+# That way, even if one of those Elves runs out of snacks, they still have two backups.
+
+# In the example above, the top three Elves are the fourth Elf (with 24000 Calories), then the third Elf (with 11000 Calories), then the fifth Elf (with 10000 Calories).
+# The sum of the Calories carried by these three elves is 45000.
+
+# Find the top three Elves carrying the most Calories. How many Calories are those Elves carrying in total?
+
 
 def load_calorie_totals(filename: str):
     """
@@ -77,16 +88,40 @@ def part1(filename: str):
     return most_calories
 
 
+def part2(filename: str):
+    # get the calories counts
+    elf_calorie_list = load_calorie_totals(filename)
+    # sort them so the biggest counts are first in the list
+    sorted_calorie_list = sorted(elf_calorie_list, reverse=True)
+    # chop off the top 3
+    top_three_elves = sorted_calorie_list[:3]
+    # add them up
+    top_three_total = sum(top_three_elves)
+
+    print(
+        f"Top 3 elves are carrying {top_three_total} from a list of {sorted_calorie_list}"
+    )
+    return top_three_total
+
+
 if __name__ == "__main__":
     # input filenames
     sample_filename = "sample.txt"
     puzzle_input_filename = "input.txt"
     # expected results for sample input
     part1_expected = 24000
+    part2_expected = 45000
 
     # test part 1
-    part1_actual = part1(sample_filename)
-    assert part1_actual == part1_expected
+    part1_test_result = part1(sample_filename)
+    assert part1_test_result == part1_expected
 
     # actual part 1
     part1_result = part1(puzzle_input_filename)
+
+    # test part 2
+    part2_test_result = part2(sample_filename)
+    assert part2_test_result == part2_expected
+
+    # actual part 2
+    part2_result = part2(puzzle_input_filename)
