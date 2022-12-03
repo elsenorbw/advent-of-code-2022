@@ -1,7 +1,8 @@
-# advent-of-code-2022
+# Advent of Code 2022
+
 Advent of code work
 
-Challenges and puzzles from https://adventofcode.com/2022
+Challenges and puzzles from [Advent of Code](https://adventofcode.com/2022)
 
 
 - Day 1 - Calories counts
