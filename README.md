@@ -10,5 +10,7 @@ Challenges and puzzles from [Advent of Code](https://adventofcode.com/2022)
 - Day 3 - Supplies in backpacks
 - Day 4 - Overlapping ranges for cleaning up the campsite
 - Day 5 - FILO crate piles
+- Day 6 - Signal detection
+- Day 7 - Filesystem structure
 
 
