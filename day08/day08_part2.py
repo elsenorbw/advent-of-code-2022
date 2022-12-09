@@ -36,11 +36,15 @@
 # The first half of this puzzle is complete! It provides one gold star: *
 
 # --- Part Two ---
-# Content with the amount of tree cover available, the Elves just need to know the best spot to build their tree house: they would like to be able to see a lot of trees.
+# Content with the amount of tree cover available, the Elves just need to know the best spot to build their tree house: 
+# they would like to be able to see a lot of trees.
 
-# To measure the viewing distance from a given tree, look up, down, left, and right from that tree; stop if you reach an edge or at the first tree that is the same height or taller than the tree under consideration. (If a tree is right on the edge, at least one of its viewing distances will be zero.)
+# To measure the viewing distance from a given tree, look up, down, left, and right from that tree; 
+# stop if you reach an edge or at the first tree that is the same height or taller than the tree under consideration. 
+# (If a tree is right on the edge, at least one of its viewing distances will be zero.)
 
-# The Elves don't care about distant trees taller than those found by the rules above; the proposed tree house has large eaves to keep it dry, so they wouldn't be able to see higher than the tree house anyway.
+# The Elves don't care about distant trees taller than those found by the rules above; the proposed tree house has large eaves to keep it dry, so 
+# they wouldn't be able to see higher than the tree house anyway.
 
 # In the example above, consider the middle 5 in the second row:
 
@@ -93,32 +97,54 @@ def print_trees(trees):
     print("")
 
 
-def calculate_visibility_for_one_orth(
-    trees, start_x, start_y, x_increment, y_increment, end_x, end_y
-):
-    result = []
-    x = start_x
-    y = start_y
-    current_tallest_tree = trees[y - y_increment][x - x_increment]
 
-    while x != end_x and y != end_y:
-        # handle this spot..
-        this_tree = trees[y][x]
-        if this_tree > current_tallest_tree:
-            print(f"Tree at {x},{y} ({this_tree}) is visible")
-            result.append((x, y))
-            current_tallest_tree = this_tree
+def calculate_scenic_in_one_direction(trees, x, y, x_increment, y_increment):
 
-        # move to next spot
+    treehouse_view_height = trees[y][x]
+    result = 0
+
+    # take an initial step
+    x += x_increment
+    y += y_increment
+
+    # get the outside limit
+    x_min = 0
+    y_min = 0
+    x_max = len(trees[0]) - 1
+    y_max = len(trees) - 1
+
+    # until we run out of trees to count..
+    while x >= x_min and x <= x_max and y >= y_min and y <= y_max:
+        # this tree is definitely visible..
+        result += 1
+        # is this the last one we can see ?
+        if trees[y][x] >= treehouse_view_height:
+            break
+
+        # next tree
         x += x_increment
         y += y_increment
-
+    
     return result
 
 
-def calculate_visible_trees(trees):
+
+
+def calculate_scenic_for_one_spot(trees, x, y):
+
+    left_view = calculate_scenic_in_one_direction(trees, x, y, -1, 0)
+    right_view = calculate_scenic_in_one_direction(trees, x, y, 1, 0)
+    top_view = calculate_scenic_in_one_direction(trees, x, y, 0, -1)
+    bottom_view = calculate_scenic_in_one_direction(trees, x, y, 0, 1)
+
+    result = left_view * right_view * top_view * bottom_view
+    print(f"location {x},{y} scores {result} - left={left_view},right={right_view},top={top_view},bottom={bottom_view}")
+    return result
+
+
+def calculate_scenic_locations(trees):
     # generate a list of all the visible tree pairs as (x, y) tuples
-    result = []
+    result = {}
 
     # first, all the outside trees are visible, so add those
     x_min = 0
@@ -130,50 +156,28 @@ def calculate_visible_trees(trees):
 
     # add the freebies..
     for x in range(x_min, x_max + 1, 1):
-        result.append((x, y_min))
-        result.append((x, y_max))
+        result[(x, y_min)] = 0
+        result[(x, y_max)] = 0
     for y in range(y_min, y_max + 1, 1):
-        result.append((x_min, y))
-        result.append((x_max, y))
+        result[(x_min, y)] = 0
+        result[(x_max, y)] = 0
 
     # now do the visible calculations for each row and column
     for x in range(x_min + 1, x_max, 1):
-        print("From top")
-        visible_from_top = calculate_visibility_for_one_orth(
-            trees, x, 1, 0, 1, x_max, y_max
-        )
-        result.extend(visible_from_top)
-
-        print("From bottom")
-        visible_from_bottom = calculate_visibility_for_one_orth(
-            trees, x, y_max - 1, 0, -1, 0, 0
-        )
-        result.extend(visible_from_bottom)
-
-    for y in range(y_min + 1, y_max, 1):
-        print("From left")
-        visible_from_left = calculate_visibility_for_one_orth(
-            trees, 1, y, 1, 0, x_max, y_max
-        )
-        result.extend(visible_from_left)
-        print("From right")
-        visible_from_right = calculate_visibility_for_one_orth(
-            trees, x_max - 1, y, -1, 0, 0, 0
-        )
-        result.extend(visible_from_right)
+        for y in range(y_min + 1, y_max, 1):
+            result[(x, y)] = calculate_scenic_for_one_spot(trees, x, y)
 
     # now trees can obviously be seen from different sides so we need the unique list
-    result = list(set(result))
     return result
 
 
-def part1(filename: str):
+def part2(filename: str):
     trees = load_trees(filename)
     print_trees(trees)
 
-    vis_trees = calculate_visible_trees(trees)
+    scenic_trees = calculate_scenic_locations(trees)
 
-    answer = len(vis_trees)
+    answer = max(scenic_trees.values())
     print(f"The number of visible trees for {filename} is {answer}")
     return answer
 
@@ -181,9 +185,9 @@ def part1(filename: str):
 if __name__ == "__main__":
     sample_filename = "sample.txt"
     puzzle_filename = "input.txt"
-    sample_expected_result = 21
+    sample_expected_result = 8
 
-    sample_actual_result = part1(sample_filename)
+    sample_actual_result = part2(sample_filename)
     assert sample_actual_result == sample_expected_result
 
-    puzzle_result = part1(puzzle_filename)
+    puzzle_result = part2(puzzle_filename)
