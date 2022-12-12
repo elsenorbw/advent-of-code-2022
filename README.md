@@ -12,5 +12,8 @@ Challenges and puzzles from [Advent of Code](https://adventofcode.com/2022)
 - Day 5 - FILO crate piles
 - Day 6 - Signal detection
 - Day 7 - Filesystem structure
-
+- Day 8 - Treehouses (grid heights)
+- Day 9 - Ropes with knots
+- Day 10 - Cathode Ray Tube addition to the machine
+- Day 11 - Monkeys
 
