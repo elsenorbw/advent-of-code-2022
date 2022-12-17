@@ -18,3 +18,4 @@ Challenges and puzzles from [Advent of Code](https://adventofcode.com/2022)
 - Day 11 - Monkeys
 
 - Day 14 - Sand flowing into caves
+- Day 15 - Sensors and Beacons 
