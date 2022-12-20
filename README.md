@@ -17,3 +17,7 @@ Challenges and puzzles from [Advent of Code](https://adventofcode.com/2022)
 - Day 10 - Cathode Ray Tube addition to the machine
 - Day 11 - Monkeys
 - Day 12 - Maze solving
+- Day 14 - Sand flowing into caves
+- Day 15 - Sensors and Beacons
+- Day 16 - Pressure valves in the volcano
+ 
