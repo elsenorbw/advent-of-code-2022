@@ -120,6 +120,44 @@
 
 # To begin, get your puzzle input.
 
+# Your puzzle answer was 6568.
+
+# The first half of this puzzle is complete! It provides one gold star: *
+
+# --- Part Two ---
+# Now, you just need to put all of the packets in the right order. Disregard the blank lines in your list of received packets.
+
+# The distress signal protocol also requires that you include two additional divider packets:
+
+# [[2]]
+# [[6]]
+# Using the same rules as before, organize all packets - the ones in your list of received packets as well as the two divider packets - into the correct order.
+
+# For the example above, the result of putting the packets in the correct order is:
+
+# []
+# [[]]
+# [[[]]]
+# [1,1,3,1,1]
+# [1,1,5,1,1]
+# [[1],[2,3,4]]
+# [1,[2,[3,[4,[5,6,0]]]],8,9]
+# [1,[2,[3,[4,[5,6,7]]]],8,9]
+# [[1],4]
+# [[2]]
+# [3]
+# [[4,4],4,4]
+# [[4,4],4,4,4]
+# [[6]]
+# [7,7,7]
+# [7,7,7,7]
+# [[8,7,6]]
+# [9]
+# Afterward, locate the divider packets. To find the decoder key for this distress signal, you need to determine the indices of the two divider packets and multiply them together.
+# (The first packet is at index 1, the second packet is at index 2, and so on.) In this example, the divider packets are 10th and 14th, and so the decoder key is 140.
+
+# Organize all of the packets into the correct order. What is the decoder key for the distress signal?
+
 
 from enum import Enum
 
@@ -141,9 +179,16 @@ class Packet:
         self.int_val = None
         self.list_val = []
         self.parent = parent
+        self.divider = False
 
     def print(self):
         print(f"{self.type}")
+
+    def set_divider_packet(self, is_divider):
+        self.divider = is_divider
+
+    def is_divider(self):
+        return self.divider
 
     def is_int(self):
         return self.type == PacketType.INT
@@ -157,7 +202,10 @@ class Packet:
         elif self.type == PacketType.INT:
             s = f"{self.int_val}"
         else:
-            s = f"<Packet type={self.type}, int_val={self.int_val}, list_val={self.list_val}>"
+            s = f"<Packet type={self.type}, int_val={self.int_val}, list_val={self.list_val} divider={self.divider}>"
+        # show the divider packets..
+        if self.divider:
+            s += " <--- DIVIDER !!"
         return s
 
     def add_list_item(self, the_item):
@@ -237,11 +285,10 @@ def packet_from_string(s: str):
     return the_packet
 
 
-def load_packet_pairs(filename: str):
+def load_all_packets(filename: str):
 
-    pairs = []
+    packets = []
 
-    current_packets = []
     with open(filename, "r") as f:
         for this_line in f:
             this_line = this_line.strip()
@@ -249,13 +296,9 @@ def load_packet_pairs(filename: str):
                 # load this line into a packet
                 this_packet = packet_from_string(this_line)
                 # add it to the list
-                current_packets.append(this_packet)
-                # if we have 2 then we can add the pair to the result..
-                if 2 == len(current_packets):
-                    pairs.append(tuple(current_packets))
-                    current_packets = []
+                packets.append(this_packet)
 
-    return pairs
+    return packets
 
 
 def correct_ordering(left, right):
@@ -309,22 +352,44 @@ def correct_ordering(left, right):
     return None
 
 
-def part1(filename: str):
-    # load the input to a set of pairs..
-    pairs = load_packet_pairs(filename)
-    for left, right in pairs:
-        print(f" left:{left}")
-        print(f"right:{right}")
-        print("")
+from functools import cmp_to_key
 
-    # run the calculations on each pair..
-    correctly_ordered = [correct_ordering(left, right) for left, right in pairs]
+
+def packet_compare_function(left, right):
+    result = correct_ordering(left, right)
+    if result is True:
+        return -1
+    elif result is False:
+        return 1
+    else:
+        return 0
+
+
+def part2(filename: str):
+    # load the input to a set of pairs..
+    packets = load_all_packets(filename)
+
+    # add the two packets that are specified in part 2
+    for this_divider in ["[[2]]", "[[6]]"]:
+        the_packet = packet_from_string(this_divider)
+        the_packet.set_divider_packet(True)
+        packets.append(the_packet)
+
+    # list before sorting..
+    for this_packet in packets:
+        print(f" packet:{this_packet}")
+
+    # sort that list..
+    sorted_packets = list(sorted(packets, key=cmp_to_key(packet_compare_function)))
+    print(f"Sorted:")
+    for this_packet in sorted_packets:
+        print(f" packet:{this_packet}")
 
     # and now add up the indices of the correctly ordered statements.. 1 based (boo)
-    total = 0
-    for idx, result in enumerate(correctly_ordered, start=1):
-        if result:
-            total += idx
+    total = 1
+    for idx, this_packet in enumerate(sorted_packets, start=1):
+        if this_packet.is_divider():
+            total *= idx
 
     result = total
     print(f"The puzzle result for {filename} is {result}")
@@ -334,9 +399,9 @@ def part1(filename: str):
 if __name__ == "__main__":
     sample_filename = "sample.txt"
     puzzle_filename = "input.txt"
-    sample_expected_result = 13
+    sample_expected_result = 140
 
-    sample_result = part1(sample_filename)
+    sample_result = part2(sample_filename)
     assert sample_result == sample_expected_result
 
-    puzzle_result = part1(puzzle_filename)
+    puzzle_result = part2(puzzle_filename)
