@@ -515,6 +515,34 @@ def load_jets_from_file(filename: str):
     return jets
 
 
+def find_interval(heights):
+
+    biggest_idx = max(heights.keys())
+    print(f"find_interval - biggest_idx={biggest_idx}")
+    historical_versions = 15
+    for window_size in range(1, 100000, 1):
+        # we have a window size let's get the last x versions..
+        indexes = [biggest_idx - (window_size * x) for x in range(historical_versions)]
+        versions = [heights[biggest_idx - (window_size * x)] for x in range(historical_versions)]
+        print(f"window_size={window_size} indexes={indexes}, versions={versions}")
+
+        # calculate the differences between the heights..
+        diffs = [versions[x-1] - versions[x] for x in range(1, historical_versions, 1)]
+        print(f"diffs=[{diffs}]")
+        # and see if they are all the same..
+        diff_change = [diffs[x-1] - diffs[x] for x in range(1, len(diffs), 1)]
+        print(f"diff_change={diff_change}")
+        # are they all 0s ?
+        zero_diff = [diff_change[x] == 0 for x in range(len(diff_change))]
+        print(f"zero_diff={zero_diff}")
+        if all(zero_diff):
+            print(f"we have a repeating loop here..")
+            window_height_increment = diffs[0]
+            print(f"window_size={window_size} window_increment={window_height_increment}")
+            return window_size, window_height_increment
+
+    raise Exception(f"Unable to find a repeating group in {window_size}")
+
 def part2(filename: str):
     # load the specific jets
     jets = load_jets_from_file(filename)
@@ -524,20 +552,48 @@ def part2(filename: str):
     board = Tetris(jets)
     board.print()
 
+    heights = dict()
+    heights[0] = board.current_top
+
     this_value = 0
     previous_value = 0
-    for x in range(1000000000000):
+
+    sample_drop_size = 1000000
+
+    # run through a few initial drops..
+    for x in range(1, sample_drop_size + 1, 1):
         board.drop_one()
-        # thinking that there must be some looping going on here once we run through all the jets..
-        # let's have an initial look by modifying the jets logic..
-        if x % 20000 == 0:
-            previous_value = this_value
-            this_value = board.current_top
-            diff = this_value - previous_value 
-            print(f"{x:06d} -> (diff={diff}) {this_value}")
+        heights[x] = board.current_top
+
+
+    # now try and find some repeating groups
+    window_size, window_height_increment = find_interval(heights)
+    # ok, so we know everything we need to..
+    total_rocks_to_drop = 1000000000000
+    # so we have the current height, plus we know how many we have dropped so far..
+    remaining_rocks_to_drop = total_rocks_to_drop - sample_drop_size
+    print(f"remaining rocks to drop={remaining_rocks_to_drop}")
+    height_so_far = board.current_top
+    print(f"height_so_far={height_so_far}")
+    # ok, we can calculate how many remaining 
+    remaining_full_windows = remaining_rocks_to_drop // window_size
+    print(f"remaining_full_windows={remaining_full_windows}")
+    height_so_far += remaining_full_windows * window_height_increment
+    print(f"height_so_far={height_so_far}")
+    remaining_rocks_to_drop -= remaining_full_windows * window_size
+    print(f"remaining_rocks_to_drop={remaining_rocks_to_drop}")
+
+    # so now we need to calculate the difference for the remaining rock drops..
+    x = sample_drop_size - window_size
+    base_height = heights[x]
+    x += remaining_rocks_to_drop
+    height_difference = heights[x] - base_height
+    height_so_far += height_difference
+    print(f"final height {height_so_far}")
+    result = height_so_far
+
 
     # board.print()
-    result = board.current_top
     print(f"height for jets from {filename} is {result}")
     return result
 
