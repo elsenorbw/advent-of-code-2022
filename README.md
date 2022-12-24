@@ -25,5 +25,5 @@ Challenges and puzzles from [Advent of Code](https://adventofcode.com/2022)
 
 
 - Day 21 - Monkey maths 
-
+- Day 22 - cube folding
  
