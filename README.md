@@ -26,4 +26,5 @@ Challenges and puzzles from [Advent of Code](https://adventofcode.com/2022)
 
 - Day 21 - Monkey maths 
 - Day 22 - cube folding
- 
+- Day 23 - Elves planting things
+- Day 25 - Snafu base 5 numbers 
